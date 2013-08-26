@@ -1,10 +1,10 @@
 # Java Quick Start Guide
 
-This guide will walk you through deploying a Java application to Amazon EC2 using OpDemand.
+This guide will walk you through deploying a Java application to Amazon EC2 using [Deis](http://github.com/opdemand/deis).
 
 ## Prerequisites
 
-* You need to have set up Deis according to the instructions in "Getting Started" (https://github.com/opdemand/deis#getting-started)
+* You need to have set up Deis according to the instructions in [Deis: Getting Started](https://github.com/opdemand/deis#getting-started)
 * You will need [Git](http://git-scm.com), [RubyGems](http://rubygems.org/pages/download), [Pip](http://www.pip-installer.org/en/latest/installing.html), the [Amazon EC2 API Tools](http://aws.amazon.com/developertools/351), [EC2 Credentials](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/SettingUp_CommandLine.html#set_aws_credentials_linux) and a Chef Server with a working [Knife](http://docs.opscode.com/knife.html) client.
 
 
@@ -16,14 +16,14 @@ This guide will walk you through deploying a Java application to Amazon EC2 usin
 
 ## Clone your Application
 
-If you want to use an existing application, no problem.  You can also fork OpDemand's sample application located at <https://github.com/bengrunfeld/example-java-jetty>.  After forking the project, clone it to your local workstation using the SSH-style URL:
+If you want to use an existing application, no problem.  You can also fork Deis' sample application located at <https://github.com/bengrunfeld/example-java-jetty>.  After forking the project, clone it to your local workstation using the SSH-style URL:
 
 	$ git clone git@github.com:mygithubuser/example-java-jetty.git
     $ cd example-java-jetty
 
 ## Prepare your Application
 
-To use a Java application with OpDemand, you will need to conform to 3 basic requirements:
+To use a Java application with Deis, you will need to conform to 3 basic requirements:
 
  1. Use [Maven](http://maven.apache.org/guides/getting-started/index.html) to compile code and manage dependencies
  2. Use [Foreman](http://ddollar.github.com/foreman/) to manage processes
@@ -31,9 +31,9 @@ To use a Java application with OpDemand, you will need to conform to 3 basic req
 
 If you're deploying the example application, it already conforms to these requirements.
 
-#### 1. Use Maven to compile code and manage dependencies
+### 1. Use Maven to compile code and manage dependencies
 
-Every time you deploy, OpDemand will run a `mvn package` on all application instances to ensure dependencies are up to date, and code is compiled and packaged.  Maven requires that you explicitly declare your dependencies using a [pom.xml](http://www.pip-installer.org/en/latest/requirements.html) file.  Here is a very [basic example](https://github.com/bengrunfeld/example-java-jetty/blob/master/pom.xml).
+Every time you deploy, Deis will run a `mvn package` on all application instances to ensure dependencies are up to date, and code is compiled and packaged.  Maven requires that you explicitly declare your dependencies using a [pom.xml](http://www.pip-installer.org/en/latest/requirements.html) file.  Here is a very [basic example](https://github.com/bengrunfeld/example-java-jetty/blob/master/pom.xml).
     
 You can then use `mvn package` to install dependencies, compile and package your application on your local workstation:
 
@@ -55,13 +55,13 @@ You can then use `mvn package` to install dependencies, compile and package your
 
 If your dependencies require any system packages, you can install those later by specifying a list of custom packages in the Instance configuration or by customizing the deploy script to install your own packages.
 
-#### 2. Use Foreman to manage processes
+### 2. Use Foreman to manage processes
 
-OpDemand uses [Foreman](http://ddollar.github.com/foreman/) to manage the processes that serve up your application.  Foreman relies on a `Procfile` that lives in the root of your repository.  This is where you define the command(s) used to run your application.  Here is an example `Procfile`:
+Deis uses [Foreman](http://ddollar.github.com/foreman/) to manage the processes that serve up your application.  Foreman relies on a `Procfile` that lives in the root of your repository.  This is where you define the command(s) used to run your application.  Here is an example `Procfile`:
 
     web: java -cp target/classes:target/dependency/* HelloWorld
 
-This tells OpDemand to run web application workers using the `java HelloWorld` command with a classpath of `target/classes:target/dependency/*`.  You can test this locally by running `foreman start`.
+This tells Deis to run web application workers using the `java HelloWorld` command with a classpath of `target/classes:target/dependency/*`.  You can test this locally by running `foreman start`.
 
     $ foreman start
     15:25:37 web.1  | started with pid 90321
@@ -71,9 +71,20 @@ This tells OpDemand to run web application workers using the `java HelloWorld` c
 
 You should now be able to access your application locally at <http://localhost:5000>.
 
-#### 3. Use Environment Variables to manage configuration
+### 3. Working with Environment Variables
 
-OpDemand uses environment variables to manage your application's configuration.  For example, your application listener must use the value of the `PORT` environment variable.  The following code snippet demonstrates how this can work inside your application:
+Deis uses [environment variables](https://help.ubuntu.com/community/EnvironmentVariables) to manage your application's configuration. 
+
+
+#### Setting an Environment Variable
+
+Environment variables can be set straight from the command line:
+
+	deis config:set VAR_NAME=value
+
+#### Retrieving an Environment Variable
+
+For example, if your application listener uses the value of the `PORT` environment variable, the following code will retrieve it, so that it can be used.
 
     import org.eclipse.jetty.server.Server;
     ...
@@ -91,55 +102,68 @@ The same is true for external services like databases, caches and queues.  Here 
 
       return DriverManager.getConnection(dbUrl, username, password);
     }
+
     
 # The Deis Workflow
 
-## 1. Turn on the Engine
+## 1. Start Your Engine
 
-1. Log in to **AWS Console**
+1. Log in to the **EC2 Management Console**
 2. Navigate to **Instances**
 3. Right-click on your controller and hit **Start**
-4. Attach an elastic IP (optional)
-5. Login to deis: `deis login <controller-ip-address>`
+4. Attach an elastic IP *(optional)*
+5. Login to Deis: `deis login <controller-ip-address>`
 
 ## 2. Create a Formation
 
-Once your controller is [set up](https://github.com/opdemand/deis#3-provision-a-deis-controller), you can use `deis create` to choose which region of EC2 you'd like to deploy to. This sets up the layers that will be deployed with the `layers` command. Besides the controller, nothin at this stage incurs cost.
+Once your controller is [set up](https://github.com/opdemand/deis#3-provision-a-deis-controller), you can use `deis create` to choose which region of EC2 you'd like to deploy to. This sets up the layers that will be deployed with the `layers` command.
 
 	deis create --flavor=ec2-us-west-2
 
 ## 3. Scale the Formation
 
-You can choose how many proxies and runtime layers to deploy to your instance in a single line of code with the `deis layers` command.
+You can choose how many proxies and runtime layers to deploy to your formation in a single line of code with the `deis layers` command.
 
 	deis layers:scale proxy=1 runtime=1
 
-Specify how many LXC containers you want to scale to within the runtime layer (the default number created with `deis layers` is 1). 
+*(optional)* You can specify how many LXC containers you want to scale to within the runtime layer (the default number created with `deis layers` is 1). 
 
 	deis containers:scale web=4 worker=2
 
-## 4. Push Your Application to Your Formation
+## 4. Push Your Application to the Formation
 
 Before you can access your application, you need to push it to your formation.
 
 	git push deis master
 
-## 5. To open your application in a browser
+## 5. To Open Your Application in a Browser
 
-Open your web-app in a browser, simply by using:
+Open your web app in a browser, simply by using:
 
 	deis open
 
-## 6. Update your Application
+## 6. Destroy the Formation or Individual Nodes
 
-Using the regular **Git** workflow, update your application code locally, then when you have performed a commit, simply push  
+At some point, you may want to destroy your formation, either because it has finished its lifecycle, or
+because you're in development and simply want to save on resource costs while you power down overnight.
 
+	deis destroy
+	
+The `deis destroy` command will terminate your proxy and runtime layers. It *does not* turn off your EC2 Instance, which is the Controller. To do that you need to go into your **EC2 Management Console**, navigate to **Instances**, find your **Controller**, right-click on it, and hit **Stop**.
 
-## Destroy your Installation
+To destroy individual nodes, use:
+
+	deis node:destroy <ID>
+
+## Update your Application
+
+Using the regular **Git** workflow, update your application code locally, then when you have performed a commit, simply push your code using:
+
+	git push deis master
 
 ## Additional Resources
 
 * [Deis Documentation](http://docs.deis.io)
-* [Deis Readme.md](http://github.com/opdemand/deis/master/blob/README.md)
+* [Deis README.md](http://github.com/opdemand/deis/blob/master/README.md)
 * [Deis Website](http://deis.io)
 
