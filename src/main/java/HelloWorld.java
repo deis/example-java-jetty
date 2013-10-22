@@ -9,7 +9,7 @@ public class HelloWorld extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        resp.getWriter().print("Powered by " + System.getenv("VAR"));
+        resp.getWriter().print("Powered by " + System.getenv("POWERED_BY"));
     }
 
     public static void main(String[] args) throws Exception{
