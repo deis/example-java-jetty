@@ -18,9 +18,9 @@ If you do not yet have a controller or a Deis formation, please review the [Deis
 
 ## Clone your Application
 
-If you want to use an existing application, no problem.  You can also use the Deis sample application located at <https://github.com/bengrunfeld/example-java-jetty>.  Clone the example application to your local workstation:
+If you want to use an existing application, no problem.  You can also use the Deis sample application located at <https://github.com/opdemand/example-java-jetty>.  Clone the example application to your local workstation:
 
-	$ git clone https://github.com/bengrunfeld/example-java-jetty.git
+	$ git clone https://github.com/opdemand/example-java-jetty.git
 	$ cd example-java-jetty
 
 ## Prepare your Application
@@ -35,7 +35,7 @@ If you're deploying the example application, it already conforms to these requir
 
 ### 1. Use Maven to compile code and manage dependencies
 
-Maven requires that you explicitly declare your dependencies using a [pom.xml](http://www.pip-installer.org/en/latest/requirements.html) file.  Here is a very [basic example](https://github.com/bengrunfeld/example-java-jetty/blob/master/pom.xml). You can then use `mvn package` to install dependencies, compile and package your application on your local workstation:
+Maven requires that you explicitly declare your dependencies using a [pom.xml](http://www.pip-installer.org/en/latest/requirements.html) file.  Here is a very [basic example](https://github.com/opdemand/example-java-jetty/blob/master/pom.xml). You can then use `mvn package` to install dependencies, compile and package your application on your local workstation:
 
 	$ mvn package
 	[INFO] Scanning for projects...
@@ -80,14 +80,14 @@ Per the prerequisites, we assume you have access to an existing Deis formation. 
 Use the following command to create an application on an existing Deis formation.
 
 	$ deis create --formation=<formationName> --id=<appName>
-	Creating application... done, created yearly-pendulum
+	Creating application... done, created <appName>
 	Git remote deis added
 	
 If an ID is not provided, one will be auto-generated for you.
 
 ## Deploy your Application
 
-Use `git push` to deploy your application.
+Use `git push deis master` to deploy your application.
 
 	$ git push deis master
 	Counting objects: 48, done.
@@ -105,13 +105,13 @@ Once your application has been deployed, use `deis open` to view it in a browser
 
 ## Scale your Application
 
-To scale your application's [Docker](http://docker.io) containers, use `deis scale`.
+To scale your application's [Docker](http://docker.io) containers, use `deis scale` and specify the number of containers for each process type defined in your application's `Procfile`. For example, `deis scale web=8`.
 
 	$ deis scale web=8
 	Scaling containers... but first, coffee!
 	done in 17s
 	
-	=== yearly-pendulum Containers
+	=== <appName> Containers
 	
 	--- web: `java -cp target/classes:target/dependency/* HelloWorld`
 	web.1 up 2013-10-25T19:24:24.054Z (jettyFormation-runtime-1)
@@ -129,20 +129,18 @@ To scale your application's [Docker](http://docker.io) containers, use `deis sca
 
 Deis applications are configured using environment variables. The example application includes a special `POWERED_BY` variable to help demonstrate how you would provide application-level configuration. 
 
-	$ curl -s http://yourapp.com
+	$ curl -s http://yourapp.yourformation.com
 	Powered by null
 	$ deis config:set POWERED_BY=Jetty
-	== yearly-pendulum
+	== <appName>
 	JAVA_OPTS: -Xmx384m -Xss512k -XX:+UseCompressedOops
 	PATH: /app/.jdk/bin:/usr/local/bin:/usr/bin:/bin
 	POWERED_BY: Jetty
 	MAVEN_OPTS: -Xmx384m -Xss512k -XX:+UseCompressedOops
-	$ curl -s http://yourapp.com
+	$ curl -s http://yourapp.yourformation.com
 	Powered by Jetty
 
-This method is also how you connect your application to backing services like databases, queues and caches.
-
-To experiment in your application environment, use `deis run` to execute one-off commands against your application.
+`deis config:set` is also how you connect your application to backing services like databases, queues and caches. You can use `deis run` to execute one-off commands against your application for things like database administration, initial application setup and inspecting your container environment.
 
 	$ deis run ls -la
 	drwxr-xr-x  8 root root 4096 Oct 25 19:24 .
