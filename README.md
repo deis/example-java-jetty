@@ -56,10 +56,10 @@ Deis relies on a [Foreman](http://ddollar.github.com/foreman/) `Procfile` that l
 This tells Deis to run `web` workers using the command `java HelloWorld`. You can test this locally by running `foreman start`.
 
 	$ foreman start
-	13:06:10 web.1  | started with pid 36840
-	13:06:11 web.1  | 2013-10-25 13:06:11.182:INFO:oejs.Server:jetty-7.6.0.v20120127
-	13:06:11 web.1  | 2013-10-25 13:06:11.268:INFO:oejsh.ContextHandler:started o.e.j.s.ServletContextHandler{/,null}
-	13:06:11 web.1  | 2013-10-25 13:06:11.319:WARN:oejuc.AbstractLifeCycle:FAILED SelectChannelConnector@0.0.0.0:5000: java.net.BindException: Address already in use
+	16:58:30 web.1  | started with pid 39129
+	16:58:33 web.1  | 2013-10-25 16:58:32.995:INFO:oejs.Server:jetty-7.6.0.v20120127
+	16:58:33 web.1  | 2013-10-25 16:58:33.253:INFO:oejsh.ContextHandler:started o.e.j.s.ServletContextHandler{/,null}
+	16:58:33 web.1  | 2013-10-25 16:58:33.448:INFO:oejs.AbstractConnector:Started SelectChannelConnector@0.0.0.0:5000
 
 
 You should now be able to access your application locally at <http://localhost:5000>.
