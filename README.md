@@ -35,9 +35,7 @@ If you're deploying the example application, it already conforms to these requir
 
 ### 1. Use Maven to compile code and manage dependencies
 
-Every time you deploy, Deis will run a `mvn package` on all application instances to ensure dependencies are up to date, and code is compiled and packaged.  Maven requires that you explicitly declare your dependencies using a [pom.xml](http://www.pip-installer.org/en/latest/requirements.html) file.  Here is a very [basic example](https://github.com/bengrunfeld/example-java-jetty/blob/master/pom.xml).
-    
-You can then use `mvn package` to install dependencies, compile and package your application on your local workstation:
+Maven requires that you explicitly declare your dependencies using a [pom.xml](http://www.pip-installer.org/en/latest/requirements.html) file.  Here is a very [basic example](https://github.com/bengrunfeld/example-java-jetty/blob/master/pom.xml). You can then use `mvn package` to install dependencies, compile and package your application on your local workstation:
 
 	$ mvn package
 	[INFO] Scanning for projects...
@@ -47,9 +45,6 @@ You can then use `mvn package` to install dependencies, compile and package your
 	[INFO] ------------------------------------------------------------------------
 	[INFO] 
 	[INFO] --- maven-resources-plugin:2.4.3:resources (default-resources) @ helloworld ---
-
-
-If your dependencies require any system packages, you can install those later by specifying a list of custom packages in the Instance configuration or by customizing the deploy script to install your own packages.
 
 ### 2. Use Foreman to manage processes
 
