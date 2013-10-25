@@ -1,11 +1,13 @@
 # Java Quick Start Guide
 
-This guide will walk you through deploying a Java application to Amazon EC2 using [Deis](http://github.com/opdemand/deis).
+This guide will walk you through deploying a Java application on Deis.
 
 ## Prerequisites
 
-* You need to have set up Deis according to the instructions in [Deis: Getting Started](https://github.com/opdemand/deis#getting-started)
-* You will need [Git](http://git-scm.com), [RubyGems](http://rubygems.org/pages/download), [Pip](http://www.pip-installer.org/en/latest/installing.html), the [Amazon EC2 API Tools](http://aws.amazon.com/developertools/351), [EC2 Credentials](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/SettingUp_CommandLine.html#set_aws_credentials_linux) and a Chef Server with a working [Knife](http://docs.opscode.com/knife.html) client.
+* A [User Account](http://docs.deis.io/en/latest/client/register/) on a [Deis Controller](http://docs.deis.io/en/latest/terms/controller/).
+* A [Deis Formation](http://docs.deis.io/en/latest/gettingstarted/concepts/#formations) that is ready to host applications
+
+If you do not yet have a controller or a Deis formation, please review the [Deis installation](http://docs.deis.io/en/latest/gettingstarted/installation/) instructions.
 
 
 ## Setup your workstation
@@ -16,10 +18,10 @@ This guide will walk you through deploying a Java application to Amazon EC2 usin
 
 ## Clone your Application
 
-If you want to use an existing application, no problem.  You can also fork Deis' sample application located at <https://github.com/bengrunfeld/example-java-jetty>.  After forking the project, clone it to your local workstation using the SSH-style URL:
+If you want to use an existing application, no problem.  You can also use the Deis sample application located at <https://github.com/bengrunfeld/example-java-jetty>.  Clone the example application to your local workstation:
 
-	$ git clone git@github.com:mygithubuser/example-java-jetty.git
-    $ cd example-java-jetty
+	$ git clone https://github.com/bengrunfeld/example-java-jetty.git
+	$ cd example-java-jetty
 
 ## Prepare your Application
 
@@ -37,133 +39,143 @@ Every time you deploy, Deis will run a `mvn package` on all application instance
     
 You can then use `mvn package` to install dependencies, compile and package your application on your local workstation:
 
-    $ mvn package
-    [INFO] Scanning for projects...
-    [INFO]                                                                         
-    [INFO] ------------------------------------------------------------------------
-    [INFO] Building helloworld 1.0-SNAPSHOT
-    [INFO] ------------------------------------------------------------------------
-    ...
-    [INFO] Copying jetty-util-7.6.0.v20120127.jar to /Users/ben/workspace/example-java-jetty/target/dependency/jetty-util-7.6.0.v20120127.jar
-    [INFO] ------------------------------------------------------------------------
-    [INFO] BUILD SUCCESS
-    [INFO] ------------------------------------------------------------------------
-    [INFO] Total time: 51.956s
-    [INFO] Finished at: Sat Apr 06 15:21:20 MDT 2013
-    [INFO] Final Memory: 11M/81M
-    [INFO] ------------------------------------------------------------------------
+	$ mvn package
+	[INFO] Scanning for projects...
+	[INFO]                                                                         
+	[INFO] ------------------------------------------------------------------------
+	[INFO] Building helloworld 1.0-SNAPSHOT
+	[INFO] ------------------------------------------------------------------------
+	[INFO] 
+	[INFO] --- maven-resources-plugin:2.4.3:resources (default-resources) @ helloworld ---
+
 
 If your dependencies require any system packages, you can install those later by specifying a list of custom packages in the Instance configuration or by customizing the deploy script to install your own packages.
 
 ### 2. Use Foreman to manage processes
 
-Deis uses [Foreman](http://ddollar.github.com/foreman/) to manage the processes that serve up your application.  Foreman relies on a `Procfile` that lives in the root of your repository.  This is where you define the command(s) used to run your application.  Here is an example `Procfile`:
+Deis relies on a [Foreman](http://ddollar.github.com/foreman/) `Procfile` that lives in the root of your repository.  This is where you define the command(s) used to run your application.  Here is an example `Procfile`:
 
     web: java -cp target/classes:target/dependency/* HelloWorld
 
-This tells Deis to run web application workers using the `java HelloWorld` command with a classpath of `target/classes:target/dependency/*`.  You can test this locally by running `foreman start`.
 
-    $ foreman start
-    15:25:37 web.1  | started with pid 90321
-    15:25:37 web.1  | 2013-04-06 15:25:37.377:INFO:oejs.Server:jetty-7.6.0.v20120127
-    15:25:37 web.1  | 2013-04-06 15:25:37.440:INFO:oejsh.ContextHandler:started o.e.j.s.ServletContextHandler{/,null}
-    15:25:37 web.1  | 2013-04-06 15:25:37.468:INFO:oejs.AbstractConnector:Started SelectChannelConnector@0.0.0.0:5000
+This tells Deis to run `web` workers using the command `java HelloWorld`. You can test this locally by running `foreman start`.
+
+	$ foreman start
+	13:06:10 web.1  | started with pid 36840
+	13:06:11 web.1  | 2013-10-25 13:06:11.182:INFO:oejs.Server:jetty-7.6.0.v20120127
+	13:06:11 web.1  | 2013-10-25 13:06:11.268:INFO:oejsh.ContextHandler:started o.e.j.s.ServletContextHandler{/,null}
+	13:06:11 web.1  | 2013-10-25 13:06:11.319:WARN:oejuc.AbstractLifeCycle:FAILED SelectChannelConnector@0.0.0.0:5000: java.net.BindException: Address already in use
+
 
 You should now be able to access your application locally at <http://localhost:5000>.
 
 ### 3. Working with Environment Variables
 
-Deis uses [environment variables](https://help.ubuntu.com/community/EnvironmentVariables) to manage your application's configuration. 
-
-
-#### Setting an Environment Variable
-
-Environment variables can be set straight from the command line:
-
-	deis config:set VAR_NAME=value
-
-#### Retrieving an Environment Variable
-
-For example, if your application listener uses the value of the `PORT` environment variable, the following code will retrieve it, so that it can be used.
+Deis uses environment variables to manage your application's configuration. For example, your application listener must use the value of the `PORT` environment variable. The following code snippet demonstrates how this can work inside your application:
 
     import org.eclipse.jetty.server.Server;
     ...
 	Server server = new Server(Integer.valueOf(System.getenv("PORT")));
 
-The same is true for external services like databases, caches and queues.  Here is an example in that shows how to make a JDBC connection to a PostgreSQL database using environment variables:
 
-    private static Connection getConnection() throws SQLException {
+## Create a new Application
 
-      String hostname = System.getenv("POSTGRES_HOST");
-      String username = System.getenv("POSTGRES_USERNAME");
-      String password = System.getenv("POSTGRES_PASSWORD");
-      String dbname = System.getenv("POSTGRES_DBNAME");
-      String dbUrl = "jdbc:postgresql://" + hostname + ':' + port + "/" + dbname;
+Per the prerequisites, we assume you have access to an existing Deis formation. If not, please review the Deis [installation instuctions](http://docs.deis.io/en/latest/gettingstarted/installation/).
 
-      return DriverManager.getConnection(dbUrl, username, password);
-    }
+Use the following command to create an application on an existing Deis formation.
 
-    
-# The Deis Workflow
-
-## 1. Start Your Engine
-
-1. Log in to the **EC2 Management Console**
-2. Navigate to **Instances**
-3. Right-click on your controller and hit **Start**
-4. Attach an elastic IP *(optional)*
-5. Login to Deis: `deis login <controller-ip-address>`
-
-## 2. Create a Formation
-
-Once your controller is [set up](https://github.com/opdemand/deis#3-provision-a-deis-controller), you can use `deis create` to choose which region of EC2 you'd like to deploy to. This sets up the layers that will be deployed with the `layers` command.
-
-	deis create --flavor=ec2-us-west-2
-
-## 3. Scale the Formation
-
-You can choose how many proxies and runtime layers to deploy to your formation in a single line of code with the `deis layers` command.
-
-	deis layers:scale proxy=1 runtime=1
-
-*(optional)* You can specify how many LXC containers you want to scale to within the runtime layer (the default number created with `deis layers` is 1). 
-
-	deis containers:scale web=4 worker=2
-
-## 4. Push Your Application to the Formation
-
-Before you can access your application, you need to push it to your formation.
-
-	git push deis master
-
-## 5. To Open Your Application in a Browser
-
-Open your web app in a browser, simply by using:
-
-	deis open
-
-## 6. Destroy the Formation or Individual Nodes
-
-At some point, you may want to destroy your formation, either because it has finished its lifecycle, or
-because you're in development and simply want to save on resource costs while you power down overnight.
-
-	deis destroy
+	$ deis create --formation=<formationName> --id=<appName>
+	Creating application... done, created yearly-pendulum
+	Git remote deis added
 	
-The `deis destroy` command will terminate your proxy and runtime layers. It *does not* turn off your EC2 Instance, which is the Controller. To do that you need to go into your **EC2 Management Console**, navigate to **Instances**, find your **Controller**, right-click on it, and hit **Stop**.
+If an ID is not provided, one will be auto-generated for you.
 
-To destroy individual nodes, use:
+## Deploy your Application
 
-	deis node:destroy <ID>
+Use `git push` to deploy your application.
 
-## Update your Application
+	$ git push deis master
+	Counting objects: 48, done.
+	Delta compression using up to 4 threads.
+	Compressing objects: 100% (30/30), done.
+	Writing objects: 100% (48/48), 13.05 KiB, done.
+	Total 48 (delta 14), reused 18 (delta 3)
+	       Java app detected
+	-----> Installing OpenJDK 1.6... done
+	-----> Installing Maven 3.0.3... done
+	-----> Installing settings.xml... done
 
-Using the regular **Git** workflow, update your application code locally, then when you have performed a commit, simply push your code using:
 
-	git push deis master
+Once your application has been deployed, use `deis open` to view it in a browser. To find out more info about your application, use `deis info`.
+
+## Scale your Application
+
+To scale your application's [Docker](http://docker.io) containers, use `deis scale`.
+
+	$ deis scale web=8
+	Scaling containers... but first, coffee!
+	done in 17s
+	
+	=== yearly-pendulum Containers
+	
+	--- web: `java -cp target/classes:target/dependency/* HelloWorld`
+	web.1 up 2013-10-25T19:24:24.054Z (jettyFormation-runtime-1)
+	web.2 up 2013-10-25T19:25:46.251Z (jettyFormation-runtime-1)
+	web.3 up 2013-10-25T19:25:46.266Z (jettyFormation-runtime-1)
+	web.4 up 2013-10-25T19:25:46.281Z (jettyFormation-runtime-1)
+	web.5 up 2013-10-25T19:25:46.297Z (jettyFormation-runtime-1)
+	web.6 up 2013-10-25T19:25:46.315Z (jettyFormation-runtime-1)
+	web.7 up 2013-10-25T19:25:46.333Z (jettyFormation-runtime-1)
+	web.8 up 2013-10-25T19:25:46.352Z (jettyFormation-runtime-1)
+	
+
+
+## Configure your Application
+
+Deis applications are configured using environment variables. The example application includes a special `POWERED_BY` variable to help demonstrate how you would provide application-level configuration. 
+
+	$ curl -s http://yourapp.com
+	Powered by null
+	$ deis config:set POWERED_BY=Jetty
+	== yearly-pendulum
+	JAVA_OPTS: -Xmx384m -Xss512k -XX:+UseCompressedOops
+	PATH: /app/.jdk/bin:/usr/local/bin:/usr/bin:/bin
+	POWERED_BY: Jetty
+	MAVEN_OPTS: -Xmx384m -Xss512k -XX:+UseCompressedOops
+	$ curl -s http://yourapp.com
+	Powered by Jetty
+
+This method is also how you connect your application to backing services like databases, queues and caches.
+
+To experiment in your application environment, use `deis run` to execute one-off commands against your application.
+
+	$ deis run ls -la
+	drwxr-xr-x  8 root root 4096 Oct 25 19:24 .
+	drwxr-xr-x 57 root root 4096 Oct 25 19:30 ..
+	-rw-r--r--  1 root root   54 Oct 25 19:23 .gitignore
+	drwxr-xr-x  6 root root 4096 Oct 25 19:23 .jdk
+	drwxr-xr-x  3 root root 4096 Oct 25 19:24 .m2
+	drwxr-xr-x  6 root root 4096 Oct 25 19:24 .maven
+	drwxr-xr-x  2 root root 4096 Oct 25 19:24 .profile.d
+	-rw-r--r--  1 root root  210 Oct 25 19:24 .release
+	-rw-r--r--  1 root root  553 Oct 25 19:23 LICENSE
+	-rw-r--r--  1 root root   60 Oct 25 19:23 Procfile
+	-rw-r--r--  1 root root 8264 Oct 25 19:23 README.md
+	-rw-r--r--  1 root root 1622 Oct 25 19:23 pom.xml
+	drwxr-xr-x  3 root root 4096 Oct 25 19:23 src
+	-rw-r--r--  1 root root   25 Oct 25 19:23 system.properties
+	drwxr-xr-x  6 root root 4096 Oct 25 19:24 target
+
+## Troubleshoot your Application
+
+To view your application's log output, including any errors or stack traces, use `deis logs`.
+
+	$ deis logs
+	<show output>
 
 ## Additional Resources
 
-* [Deis Documentation](http://docs.deis.io)
-* [Deis README.md](http://github.com/opdemand/deis/blob/master/README.md)
-* [Deis Website](http://deis.io)
-
+* [Get Deis](http://deis.io/get-deis/)
+* [GitHub Project](https://github.com/opdemand/deis)
+* [Documentation](http://docs.deis.io/)
+* [Blog](http://deis.io/blog/)
