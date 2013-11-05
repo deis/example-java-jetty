@@ -166,6 +166,7 @@ To view your application's log output, including any errors or stack traces, use
 	$ deis logs
 	<show output>
 
+
 ## Additional Resources
 
 * [Get Deis](http://deis.io/get-deis/)
