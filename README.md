@@ -164,7 +164,8 @@ Deis applications are configured using environment variables. The example applic
 To view your application's log output, including any errors or stack traces, use `deis logs`.
 
 	$ deis logs
-	<show output>
+	Nov  7 16:43:55 ip-172-31-11-82 klutzy-quacking[web.1]: Picked up JAVA_TOOL_OPTIONS:  -Djava.rmi.server.useCodebaseOnly=true -Djava.rmi.server.useCodebaseOnly=true
+	Nov  7 16:43:55 ip-172-31-11-82 klutzy-quacking[web.1]: 2013-11-07 16:43:55.857:INFO:oejs.Server:jetty-7.6.0.v20120127
 
 
 ## Additional Resources
