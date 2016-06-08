@@ -1,6 +1,6 @@
 # Java Quick Start Guide
 
-This guide will walk you through deploying a Java application on Deis.
+This guide will walk you through deploying a Java application on [Deis Workflow][].
 
 ## Usage
 
@@ -70,7 +70,8 @@ Powered by Deis
 
 ## Additional Resources
 
-* [Get Deis](http://deis.io/get-deis/)
-* [GitHub Project](https://github.com/deis/deis)
-* [Documentation](http://docs.deis.io/)
-* [Blog](http://deis.io/blog/)
+* [GitHub Project](https://github.com/deis/workflow)
+* [Documentation](https://deis.com/docs/workflow/)
+* [Blog](https://deis.com/blog/)
+
+[Deis Workflow]: https://github.com/deis/workflow#readme
