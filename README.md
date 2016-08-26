@@ -23,25 +23,26 @@ Starting build... but first, coffee!
 -----> Installing Maven 3.3.9... done
 -----> Executing: mvn -B -DskipTests clean dependency:list install
        [INFO] Scanning for projects...
-       [INFO] Downloading: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-dependency-plugin/2.4/maven-dependency-plugin-2.4.pom
+       [INFO] Downloading: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-dependency-plugin/2.10/maven-dependency-plugin-2.10.pom
 ...
-       [INFO] Downloaded: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-digest/1.0/plexus-digest-1.0.jar (12 KB at 246.4 KB/sec)
-       [INFO] Downloaded: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.0.5/plexus-utils-3.0.5.jar (226 KB at 3814.3 KB/sec)
-       [INFO] Installing /tmp/build/target/helloworld-1.0-SNAPSHOT.jar to /tmp/cache/.m2/repository/com/example/helloworld/1.0-SNAPSHOT/helloworld-1.0-SNAPSHOT.jar
-       [INFO] Installing /tmp/build/pom.xml to /tmp/cache/.m2/repository/com/example/helloworld/1.0-SNAPSHOT/helloworld-1.0-SNAPSHOT.pom
+       INFO] Downloading: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-digest/1.0/plexus-digest-1.0.jar
+       [INFO] Downloaded: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-digest/1.0/plexus-digest-1.0.jar (12 KB at 227.1 KB/sec)
+       [INFO] Downloaded: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.0.5/plexus-utils-3.0.5.jar (226 KB at 3629.8 KB/sec)
+       [INFO] Installing /tmp/build/target/hello-world-0.1-SNAPSHOT.jar to /tmp/cache/.m2/repository/org/example/hello-world/0.1-SNAPSHOT/hello-world-0.1-SNAPSHOT.jar
+       [INFO] Installing /tmp/build/pom.xml to /tmp/cache/.m2/repository/org/example/hello-world/0.1-SNAPSHOT/hello-world-0.1-SNAPSHOT.pom
        [INFO] ------------------------------------------------------------------------
        [INFO] BUILD SUCCESS
        [INFO] ------------------------------------------------------------------------
-       [INFO] Total time: 15.769 s
-       [INFO] Finished at: 2016-06-09T18:49:40+00:00
-       [INFO] Final Memory: 20M/244M
+       [INFO] Total time: 30.272 s
+       [INFO] Finished at: 2016-08-26T00:31:58+00:00
+       [INFO] Final Memory: 22M/56M
        [INFO] ------------------------------------------------------------------------
 -----> Discovering process types
        Procfile declares types -> web
------> Compiled slug size is 49M
+-----> Compiled slug size is 50M
 Build complete.
 Launching App...
-Done, vulcan-keypunch:v2 deployed to Deis
+Done, vulcan-keypunch:v2 deployed to Workflow
 
 Use 'deis open' to view this application in your browser
 
@@ -51,6 +52,7 @@ To ssh://git@deis-builder.deis.rocks:2222/vulcan-keypunch.git
  * [new branch]      master -> master
 $ curl http://vulcan-keypunch.deis.rocks
 Powered by Deis
+Release v2 on vulcan-keypunch-web-514879262-7p9hd
 ```
 
 ## Additional Resources
